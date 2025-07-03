@@ -1,3 +1,4 @@
+import { Filters } from '@/components/filter'
 import { Navbar } from '@/components/navbar'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -13,19 +14,22 @@ function App() {
         <div className="h-full w-[25%] shrink-0 rounded-md bg-zinc-800"></div>
 
         <div className="h-full w-full rounded-md bg-gradient-to-b from-blue-800/40 to-zinc-800 to-[40%] px-6 py-4">
-          <div className="flex h-fit w-full flex-row items-center justify-start gap-2">
-            <div className="h-fit w-fit rounded-3xl bg-white p-2 px-4 tracking-wide text-black">
-              All
-            </div>
-
-            <div className="h-fit w-fit rounded-3xl bg-white/15 p-2 px-4 tracking-wide text-white hover:bg-white hover:text-black">
-              Music
-            </div>
-
-            <div className="h-fit w-fit rounded-3xl bg-white/15 p-2 px-4 tracking-wide text-white hover:bg-white hover:text-black">
-              Podcasts
-            </div>
-          </div>
+          <Filters
+            items={[
+              {
+                name: 'All',
+                active: true,
+              },
+              {
+                name: 'Music',
+                active: false,
+              },
+              {
+                name: 'Podcasts',
+                active: false,
+              },
+            ]}
+          />
         </div>
         <div className="h-full w-[25%] shrink-0 rounded-md bg-zinc-800"></div>
       </div>
