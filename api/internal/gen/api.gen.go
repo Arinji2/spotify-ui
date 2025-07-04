@@ -14,24 +14,10 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
-// Defines values for GetPlaylistParamsSortBy.
-const (
-	AddedAt  GetPlaylistParamsSortBy = "added_at"
-	Album    GetPlaylistParamsSortBy = "album"
-	Duration GetPlaylistParamsSortBy = "duration"
-	Title    GetPlaylistParamsSortBy = "title"
-)
-
-// Defines values for GetPlaylistParamsSortOrder.
-const (
-	Asc  GetPlaylistParamsSortOrder = "asc"
-	Desc GetPlaylistParamsSortOrder = "desc"
-)
-
 // Artist defines model for Artist.
 type Artist struct {
-	Id   *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // Error defines model for Error.
@@ -42,33 +28,45 @@ type Error struct {
 
 // Image defines model for Image.
 type Image struct {
-	Height *int    `json:"height,omitempty"`
-	Url    *string `json:"url,omitempty"`
-	Width  *int    `json:"width,omitempty"`
+	Height int    `json:"height"`
+	Url    string `json:"url"`
+	Width  int    `json:"width"`
 }
 
 // Playlist defines model for Playlist.
 type Playlist struct {
-	Description *string `json:"description,omitempty"`
-	Id          string  `json:"id"`
-	Images      []Image `json:"images"`
-	Name        string  `json:"name"`
-	Owner       User    `json:"owner"`
-	Tracks      []Track `json:"tracks"`
+	Description string    `json:"description"`
+	Id          string    `json:"id"`
+	Images      []Image   `json:"images"`
+	Name        string    `json:"name"`
+	Owner       User      `json:"owner"`
+	Tracks      TrackPage `json:"tracks"`
+}
+
+// PlaylistTrack defines model for PlaylistTrack.
+type PlaylistTrack struct {
+	AddedAt string `json:"added_at"`
+	IsLocal bool   `json:"is_local"`
+	Track   Track  `json:"track"`
 }
 
 // Track defines model for Track.
 type Track struct {
-	Artists    *[]Artist `json:"artists,omitempty"`
-	DurationMs *int      `json:"duration_ms,omitempty"`
-	Id         *string   `json:"id,omitempty"`
-	Name       *string   `json:"name,omitempty"`
+	Artists    []Artist `json:"artists"`
+	DurationMs int      `json:"duration_ms"`
+	Id         string   `json:"id"`
+	Name       string   `json:"name"`
+}
+
+// TrackPage defines model for TrackPage.
+type TrackPage struct {
+	Items []PlaylistTrack `json:"items"`
 }
 
 // User defines model for User.
 type User struct {
-	DisplayName *string `json:"display_name,omitempty"`
-	Id          *string `json:"id,omitempty"`
+	DisplayName string `json:"display_name"`
+	Id          string `json:"id"`
 }
 
 // AuthSecret defines model for AuthSecret.
@@ -83,28 +81,7 @@ type Unauthorized = Error
 // GetPlaylistParams defines parameters for GetPlaylist.
 type GetPlaylistParams struct {
 	Secret AuthSecret `form:"secret" json:"secret"`
-
-	// Limit Max number of tracks to return
-	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset Number of tracks to skip
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
-
-	// Search Search by track title or artist name
-	Search *string `form:"search,omitempty" json:"search,omitempty"`
-
-	// SortBy Field to sort by
-	SortBy *GetPlaylistParamsSortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
-
-	// SortOrder Sort direction (asc or desc)
-	SortOrder *GetPlaylistParamsSortOrder `form:"sort_order,omitempty" json:"sort_order,omitempty"`
 }
-
-// GetPlaylistParamsSortBy defines parameters for GetPlaylist.
-type GetPlaylistParamsSortBy string
-
-// GetPlaylistParamsSortOrder defines parameters for GetPlaylist.
-type GetPlaylistParamsSortOrder string
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -161,46 +138,6 @@ func (siw *ServerInterfaceWrapper) GetPlaylist(w http.ResponseWriter, r *http.Re
 	err = runtime.BindQueryParameter("form", true, true, "secret", r.URL.Query(), &params.Secret)
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "secret", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "search" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort_by" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort_by", r.URL.Query(), &params.SortBy)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort_by", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "sort_order" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "sort_order", r.URL.Query(), &params.SortOrder)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort_order", Err: err})
 		return
 	}
 
