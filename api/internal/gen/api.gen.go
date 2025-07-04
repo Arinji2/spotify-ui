@@ -31,9 +31,12 @@ type Token struct {
 	TokenType string `json:"token_type"`
 }
 
+// AuthSecret defines model for AuthSecret.
+type AuthSecret = string
+
 // GetTokenParams defines parameters for GetToken.
 type GetTokenParams struct {
-	Secret string `form:"secret" json:"secret"`
+	Secret AuthSecret `form:"secret" json:"secret"`
 }
 
 // ServerInterface represents all server handlers.
@@ -64,7 +67,6 @@ type MiddlewareFunc func(http.Handler) http.Handler
 
 // GetToken operation middleware
 func (siw *ServerInterfaceWrapper) GetToken(w http.ResponseWriter, r *http.Request) {
-
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -73,7 +75,6 @@ func (siw *ServerInterfaceWrapper) GetToken(w http.ResponseWriter, r *http.Reque
 	// ------------- Required query parameter "secret" -------------
 
 	if paramValue := r.URL.Query().Get("secret"); paramValue != "" {
-
 	} else {
 		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "secret"})
 		return
@@ -249,8 +250,10 @@ type StrictServerInterface interface {
 	GetToken(ctx context.Context, request GetTokenRequestObject) (GetTokenResponseObject, error)
 }
 
-type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
-type StrictMiddlewareFunc = strictnethttp.StrictHTTPMiddlewareFunc
+type (
+	StrictHandlerFunc    = strictnethttp.StrictHTTPHandlerFunc
+	StrictMiddlewareFunc = strictnethttp.StrictHTTPMiddlewareFunc
+)
 
 type StrictHTTPServerOptions struct {
 	RequestErrorHandlerFunc  func(w http.ResponseWriter, r *http.Request, err error)
