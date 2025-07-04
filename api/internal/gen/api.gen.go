@@ -16,7 +16,8 @@ import (
 
 // Error defines model for Error.
 type Error struct {
-	Error string `json:"error"`
+	DisplayMessage *string `json:"display_message,omitempty"`
+	Error          string  `json:"error"`
 }
 
 // Token defines model for Token.
@@ -33,6 +34,12 @@ type Token struct {
 
 // AuthSecret defines model for AuthSecret.
 type AuthSecret = string
+
+// InternalError defines model for InternalError.
+type InternalError = Error
+
+// Unauthorized defines model for Unauthorized.
+type Unauthorized = Error
 
 // GetTokenParams defines parameters for GetToken.
 type GetTokenParams struct {
@@ -67,6 +74,7 @@ type MiddlewareFunc func(http.Handler) http.Handler
 
 // GetToken operation middleware
 func (siw *ServerInterfaceWrapper) GetToken(w http.ResponseWriter, r *http.Request) {
+
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -75,6 +83,7 @@ func (siw *ServerInterfaceWrapper) GetToken(w http.ResponseWriter, r *http.Reque
 	// ------------- Required query parameter "secret" -------------
 
 	if paramValue := r.URL.Query().Get("secret"); paramValue != "" {
+
 	} else {
 		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "secret"})
 		return
@@ -217,6 +226,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	return r
 }
 
+type InternalErrorJSONResponse Error
+
+type UnauthorizedJSONResponse Error
+
 type GetTokenRequestObject struct {
 	Params GetTokenParams
 }
@@ -234,11 +247,20 @@ func (response GetToken200JSONResponse) VisitGetTokenResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetToken401JSONResponse Error
+type GetToken401JSONResponse struct{ UnauthorizedJSONResponse }
 
 func (response GetToken401JSONResponse) VisitGetTokenResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetToken500JSONResponse struct{ InternalErrorJSONResponse }
+
+func (response GetToken500JSONResponse) VisitGetTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -250,10 +272,8 @@ type StrictServerInterface interface {
 	GetToken(ctx context.Context, request GetTokenRequestObject) (GetTokenResponseObject, error)
 }
 
-type (
-	StrictHandlerFunc    = strictnethttp.StrictHTTPHandlerFunc
-	StrictMiddlewareFunc = strictnethttp.StrictHTTPMiddlewareFunc
-)
+type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
+type StrictMiddlewareFunc = strictnethttp.StrictHTTPMiddlewareFunc
 
 type StrictHTTPServerOptions struct {
 	RequestErrorHandlerFunc  func(w http.ResponseWriter, r *http.Request, err error)
