@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/arinji2/spotify-ui-api/internal/logx"
 )
 
 const DefaultCacheDuration = 24 * time.Hour
@@ -16,9 +18,10 @@ type CacheItem struct {
 }
 
 type InMemoryCache struct {
-	mu       sync.RWMutex
-	items    map[string]CacheItem
-	filePath string
+	mu        sync.RWMutex
+	items     map[string]CacheItem
+	filePath  string
+	needsSave bool
 }
 
 func NewInMemoryCache() *InMemoryCache {
@@ -27,6 +30,20 @@ func NewInMemoryCache() *InMemoryCache {
 		filePath: "cache.json",
 	}
 	cache.loadFromFile()
+
+	ticker := time.NewTicker(time.Second * 30)
+	go func() {
+		for range ticker.C {
+			cache.mu.RLock()
+			needsSave := cache.needsSave
+			cache.mu.RUnlock()
+
+			if needsSave {
+				logx.Debug("Saving cache to file [TICKER]")
+				cache.SaveToFile()
+			}
+		}
+	}()
 	return cache
 }
 
@@ -50,15 +67,26 @@ func (c *InMemoryCache) Set(key Key, value []byte, duration time.Duration) {
 		Value:      value,
 		Expiration: time.Now().Add(duration).UnixNano(),
 	}
-	c.saveToFile()
+	c.needsSave = true
 }
 
-func (c *InMemoryCache) saveToFile() {
-	data, err := json.MarshalIndent(c.items, "", "  ")
+func (c *InMemoryCache) SaveToFile() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	now := time.Now().UnixNano()
+	clean := map[string]CacheItem{}
+	for k, v := range c.items {
+		if v.Expiration > now {
+			clean[k] = v
+		}
+	}
+	data, err := json.MarshalIndent(clean, "", "  ")
 	if err != nil {
 		return
 	}
 	_ = os.WriteFile(c.filePath, data, 0644)
+
+	c.needsSave = false
 }
 
 func (c *InMemoryCache) loadFromFile() {
