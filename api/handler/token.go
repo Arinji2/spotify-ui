@@ -16,7 +16,7 @@ func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObjec
 		}, nil
 	}
 
-	// Respond with a token — you can plug in real logic here
+	// Do Stuff
 	return gen.GetToken200JSONResponse{
 		AccessToken: "mock-token",
 		ExpiresIn:   3600,
