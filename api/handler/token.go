@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/arinji2/spotify-ui-api/gen"
+	"github.com/arinji2/spotify-ui-api/internal/gen"
 )
 
 func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObject) (gen.GetTokenResponseObject, error) {
