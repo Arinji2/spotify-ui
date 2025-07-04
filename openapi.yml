@@ -4,19 +4,71 @@ info:
   version: 1.0.0
 
 paths:
-  /api/token:
+  /api/playlist/{playlist_id}:
     get:
-      summary: Get Spotify Token
-      operationId: getToken
+      summary: Get Playlist Metadata + Tracks
+      operationId: getPlaylist
       parameters:
         - $ref: "#/components/parameters/AuthSecret"
+        - name: playlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+
+        # Pagination
+        - name: limit
+          in: query
+          description: Max number of tracks to return
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+
+        - name: offset
+          in: query
+          description: Number of tracks to skip
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+
+        # Search filter
+        - name: search
+          in: query
+          description: Search by track title or artist name
+          required: false
+          schema:
+            type: string
+
+        # Sort options
+        - name: sort_by
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum: [title, album, added_at, duration]
+
+        - name: sort_order
+          in: query
+          description: Sort direction (asc or desc)
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+
       responses:
         "200":
-          description: A Spotify Bearer Token
+          description: Playlist data with tracks
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Token"
+                $ref: "#/components/schemas/Playlist"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "500":
@@ -55,7 +107,7 @@ components:
           description: The access token to use for API calls.
         expiry:
           type: integer
-          description: The time in seconds until the token expires.
+          description: The UNIX timestamp when the token expires.
       required:
         - access_token
         - expiry
@@ -69,5 +121,69 @@ components:
           type: string
       required:
         - error
-      optional:
-        - display_message
+
+    Image:
+      type: object
+      properties:
+        url:
+          type: string
+        height:
+          type: integer
+        width:
+          type: integer
+
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        display_name:
+          type: string
+
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        artists:
+          type: array
+          items:
+            $ref: "#/components/schemas/Artist"
+        duration_ms:
+          type: integer
+
+    Playlist:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+        owner:
+          $ref: "#/components/schemas/User"
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Track"
+      required:
+        - id
+        - name
+        - images
+        - owner
+        - tracks

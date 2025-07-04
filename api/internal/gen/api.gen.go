@@ -14,19 +14,61 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
+// Defines values for GetPlaylistParamsSortBy.
+const (
+	AddedAt  GetPlaylistParamsSortBy = "added_at"
+	Album    GetPlaylistParamsSortBy = "album"
+	Duration GetPlaylistParamsSortBy = "duration"
+	Title    GetPlaylistParamsSortBy = "title"
+)
+
+// Defines values for GetPlaylistParamsSortOrder.
+const (
+	Asc  GetPlaylistParamsSortOrder = "asc"
+	Desc GetPlaylistParamsSortOrder = "desc"
+)
+
+// Artist defines model for Artist.
+type Artist struct {
+	Id   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	DisplayMessage *string `json:"display_message,omitempty"`
 	Error          string  `json:"error"`
 }
 
-// Token defines model for Token.
-type Token struct {
-	// AccessToken The access token to use for API calls.
-	AccessToken string `json:"access_token"`
+// Image defines model for Image.
+type Image struct {
+	Height *int    `json:"height,omitempty"`
+	Url    *string `json:"url,omitempty"`
+	Width  *int    `json:"width,omitempty"`
+}
 
-	// Expiry The time in seconds until the token expires.
-	Expiry int `json:"expiry"`
+// Playlist defines model for Playlist.
+type Playlist struct {
+	Description *string `json:"description,omitempty"`
+	Id          string  `json:"id"`
+	Images      []Image `json:"images"`
+	Name        string  `json:"name"`
+	Owner       User    `json:"owner"`
+	Tracks      []Track `json:"tracks"`
+}
+
+// Track defines model for Track.
+type Track struct {
+	Artists    *[]Artist `json:"artists,omitempty"`
+	DurationMs *int      `json:"duration_ms,omitempty"`
+	Id         *string   `json:"id,omitempty"`
+	Name       *string   `json:"name,omitempty"`
+}
+
+// User defines model for User.
+type User struct {
+	DisplayName *string `json:"display_name,omitempty"`
+	Id          *string `json:"id,omitempty"`
 }
 
 // AuthSecret defines model for AuthSecret.
@@ -38,25 +80,46 @@ type InternalError = Error
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = Error
 
-// GetTokenParams defines parameters for GetToken.
-type GetTokenParams struct {
+// GetPlaylistParams defines parameters for GetPlaylist.
+type GetPlaylistParams struct {
 	Secret AuthSecret `form:"secret" json:"secret"`
+
+	// Limit Max number of tracks to return
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset Number of tracks to skip
+	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+
+	// Search Search by track title or artist name
+	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// SortBy Field to sort by
+	SortBy *GetPlaylistParamsSortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
+
+	// SortOrder Sort direction (asc or desc)
+	SortOrder *GetPlaylistParamsSortOrder `form:"sort_order,omitempty" json:"sort_order,omitempty"`
 }
+
+// GetPlaylistParamsSortBy defines parameters for GetPlaylist.
+type GetPlaylistParamsSortBy string
+
+// GetPlaylistParamsSortOrder defines parameters for GetPlaylist.
+type GetPlaylistParamsSortOrder string
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get Spotify Token
-	// (GET /api/token)
-	GetToken(w http.ResponseWriter, r *http.Request, params GetTokenParams)
+	// Get Playlist Metadata + Tracks
+	// (GET /api/playlist/{playlist_id})
+	GetPlaylist(w http.ResponseWriter, r *http.Request, playlistId string, params GetPlaylistParams)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
 
-// Get Spotify Token
-// (GET /api/token)
-func (_ Unimplemented) GetToken(w http.ResponseWriter, r *http.Request, params GetTokenParams) {
+// Get Playlist Metadata + Tracks
+// (GET /api/playlist/{playlist_id})
+func (_ Unimplemented) GetPlaylist(w http.ResponseWriter, r *http.Request, playlistId string, params GetPlaylistParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -69,13 +132,22 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// GetToken operation middleware
-func (siw *ServerInterfaceWrapper) GetToken(w http.ResponseWriter, r *http.Request) {
+// GetPlaylist operation middleware
+func (siw *ServerInterfaceWrapper) GetPlaylist(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
+	// ------------- Path parameter "playlist_id" -------------
+	var playlistId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "playlist_id", chi.URLParam(r, "playlist_id"), &playlistId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "playlist_id", Err: err})
+		return
+	}
+
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetTokenParams
+	var params GetPlaylistParams
 
 	// ------------- Required query parameter "secret" -------------
 
@@ -92,8 +164,48 @@ func (siw *ServerInterfaceWrapper) GetToken(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_by" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_by", r.URL.Query(), &params.SortBy)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort_by", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_order" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_order", r.URL.Query(), &params.SortOrder)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort_order", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetToken(w, r, params)
+		siw.Handler.GetPlaylist(w, r, playlistId, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -217,7 +329,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/token", wrapper.GetToken)
+		r.Get(options.BaseURL+"/api/playlist/{playlist_id}", wrapper.GetPlaylist)
 	})
 
 	return r
@@ -227,35 +339,36 @@ type InternalErrorJSONResponse Error
 
 type UnauthorizedJSONResponse Error
 
-type GetTokenRequestObject struct {
-	Params GetTokenParams
+type GetPlaylistRequestObject struct {
+	PlaylistId string `json:"playlist_id"`
+	Params     GetPlaylistParams
 }
 
-type GetTokenResponseObject interface {
-	VisitGetTokenResponse(w http.ResponseWriter) error
+type GetPlaylistResponseObject interface {
+	VisitGetPlaylistResponse(w http.ResponseWriter) error
 }
 
-type GetToken200JSONResponse Token
+type GetPlaylist200JSONResponse Playlist
 
-func (response GetToken200JSONResponse) VisitGetTokenResponse(w http.ResponseWriter) error {
+func (response GetPlaylist200JSONResponse) VisitGetPlaylistResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetToken401JSONResponse struct{ UnauthorizedJSONResponse }
+type GetPlaylist401JSONResponse struct{ UnauthorizedJSONResponse }
 
-func (response GetToken401JSONResponse) VisitGetTokenResponse(w http.ResponseWriter) error {
+func (response GetPlaylist401JSONResponse) VisitGetPlaylistResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetToken500JSONResponse struct{ InternalErrorJSONResponse }
+type GetPlaylist500JSONResponse struct{ InternalErrorJSONResponse }
 
-func (response GetToken500JSONResponse) VisitGetTokenResponse(w http.ResponseWriter) error {
+func (response GetPlaylist500JSONResponse) VisitGetPlaylistResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -264,9 +377,9 @@ func (response GetToken500JSONResponse) VisitGetTokenResponse(w http.ResponseWri
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// Get Spotify Token
-	// (GET /api/token)
-	GetToken(ctx context.Context, request GetTokenRequestObject) (GetTokenResponseObject, error)
+	// Get Playlist Metadata + Tracks
+	// (GET /api/playlist/{playlist_id})
+	GetPlaylist(ctx context.Context, request GetPlaylistRequestObject) (GetPlaylistResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -298,25 +411,26 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// GetToken operation middleware
-func (sh *strictHandler) GetToken(w http.ResponseWriter, r *http.Request, params GetTokenParams) {
-	var request GetTokenRequestObject
+// GetPlaylist operation middleware
+func (sh *strictHandler) GetPlaylist(w http.ResponseWriter, r *http.Request, playlistId string, params GetPlaylistParams) {
+	var request GetPlaylistRequestObject
 
+	request.PlaylistId = playlistId
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetToken(ctx, request.(GetTokenRequestObject))
+		return sh.ssi.GetPlaylist(ctx, request.(GetPlaylistRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetToken")
+		handler = middleware(handler, "GetPlaylist")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetTokenResponseObject); ok {
-		if err := validResponse.VisitGetTokenResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetPlaylistResponseObject); ok {
+		if err := validResponse.VisitGetPlaylistResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
