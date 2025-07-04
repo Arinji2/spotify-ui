@@ -11,9 +11,8 @@ type Handler struct {
 	Cache *cache.InMemoryCache
 }
 
-func NewHandler() *Handler {
+func NewHandler(cache *cache.InMemoryCache) *Handler {
 	env := env.SetupEnv()
-	cache := cache.NewInMemoryCache()
 	return &Handler{
 		Env:   env,
 		Cache: cache,

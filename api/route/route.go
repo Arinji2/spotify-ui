@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/arinji2/spotify-ui-api/handler"
+	"github.com/arinji2/spotify-ui-api/internal/cache"
 	"github.com/arinji2/spotify-ui-api/internal/gen"
 	"github.com/arinji2/spotify-ui-api/internal/httpmiddleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func RegisterRoutes() http.Handler {
-	h := handler.NewHandler()
+func RegisterRoutes(cache *cache.InMemoryCache) http.Handler {
+	h := handler.NewHandler(cache)
 
 	r := chi.NewRouter()
 
