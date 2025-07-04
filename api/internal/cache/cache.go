@@ -31,7 +31,12 @@ func NewInMemoryCache() *InMemoryCache {
 	}
 	cache.loadFromFile()
 
-	ticker := time.NewTicker(time.Second * 30)
+	interval := time.Minute * 30
+	if os.Getenv("DEBUG") == "true" {
+		logx.Debug("Enabled Debug Caching")
+		interval = time.Second * 1
+	}
+	ticker := time.NewTicker(interval)
 	go func() {
 		for range ticker.C {
 			cache.mu.RLock()
@@ -39,7 +44,6 @@ func NewInMemoryCache() *InMemoryCache {
 			cache.mu.RUnlock()
 
 			if needsSave {
-				logx.Debug("Saving cache to file [TICKER]")
 				cache.SaveToFile()
 			}
 		}
@@ -73,6 +77,7 @@ func (c *InMemoryCache) Set(key Key, value []byte, duration time.Duration) {
 func (c *InMemoryCache) SaveToFile() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	logx.Debug("Saving cache to file")
 	now := time.Now().UnixNano()
 	clean := map[string]CacheItem{}
 	for k, v := range c.items {
