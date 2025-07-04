@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Get Spotify Data
+  version: 1.0.0
+paths:
+  /api/token:
+    get:
+      summary: Get Spotify Token
+      operationId: getToken
+      parameters:
+        - name: secret
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A Spotify Bearer Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        "401":
+          description: Unauthorized — secret is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: The access token to use for API calls.
+        expires_in:
+          type: integer
+          description: The time in seconds until the token expires.
+        token_type:
+          type: string
+          description: The type of token, always "Bearer".
+      required:
+        - access_token
+        - expires_in
+        - token_type
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
