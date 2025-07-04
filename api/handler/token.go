@@ -18,7 +18,7 @@ func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObjec
 	if exists {
 		var cachedToken gen.Token
 		if err := json.Unmarshal(data, &cachedToken); err != nil {
-			return openapi.InternalError(fmt.Errorf("unmarshal cached token: %w", err).Error(), "Error With Authenticating to Spotify"), nil
+			return openapi.InternalError[gen.GetToken500JSONResponse](fmt.Errorf("unmarshal cached token: %w", err).Error(), "Error With Authenticating to Spotify"), nil
 		}
 
 		log.Println("Using cached token")
@@ -33,7 +33,7 @@ func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObjec
 
 	token, err := config.Token(ctx)
 	if err != nil {
-		return openapi.InternalError(fmt.Errorf("get token from Spotify: %w", err).Error(), "Error With Authenticating to Spotify"), nil
+		return openapi.InternalError[gen.GetToken500JSONResponse](fmt.Errorf("get token from Spotify: %w", err).Error(), "Error With Authenticating to Spotify"), nil
 	}
 
 	expiryUnix := int(token.Expiry.Unix())
@@ -44,7 +44,7 @@ func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObjec
 
 	data, err = json.Marshal(tokenData)
 	if err != nil {
-		return openapi.InternalError(fmt.Errorf("marshal token: %w", err).Error(), "Error With Authenticating to Spotify"), nil
+		return openapi.InternalError[gen.GetToken500JSONResponse](fmt.Errorf("marshal token: %w", err).Error(), "Error With Authenticating to Spotify"), nil
 	}
 
 	cacheDuration := time.Until(token.Expiry)

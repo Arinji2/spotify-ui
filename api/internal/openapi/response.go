@@ -7,11 +7,18 @@ func StringPtr(s string) *string {
 	return &s
 }
 
-func InternalError(msg, userMsg string) gen.GetToken500JSONResponse {
-	return gen.GetToken500JSONResponse{
-		InternalErrorJSONResponse: gen.InternalErrorJSONResponse{
-			Error:          msg,
-			DisplayMessage: StringPtr(userMsg),
-		},
+func InternalError[T any](msg, userMsg string) T {
+	var resp T
+	switch v := any(&resp).(type) {
+	case *gen.GetToken500JSONResponse:
+		*v = gen.GetToken500JSONResponse{
+			InternalErrorJSONResponse: gen.InternalErrorJSONResponse{
+				Error:          msg,
+				DisplayMessage: StringPtr(userMsg),
+			},
+		}
+	default:
+		panic("InternalError: unsupported response type")
 	}
+	return resp
 }
