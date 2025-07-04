@@ -2,17 +2,14 @@ openapi: 3.0.0
 info:
   title: Get Spotify Data
   version: 1.0.0
+
 paths:
   /api/token:
     get:
       summary: Get Spotify Token
       operationId: getToken
       parameters:
-        - name: secret
-          in: query
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/AuthSecret"
       responses:
         "200":
           description: A Spotify Bearer Token
@@ -26,7 +23,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
 components:
+  parameters:
+    AuthSecret:
+      name: secret
+      in: query
+      required: true
+      schema:
+        type: string
+
   schemas:
     Token:
       type: object
