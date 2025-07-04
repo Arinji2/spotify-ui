@@ -2,7 +2,10 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/arinji2/spotify-ui-api/internal/gen"
 	"github.com/arinji2/spotify-ui-api/internal/openapi"
@@ -12,6 +15,21 @@ import (
 )
 
 func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObject) (gen.GetTokenResponseObject, error) {
+	data, exists := h.Cache.Get("token")
+	if exists {
+		tokenData := gen.Token{}
+		err := json.Unmarshal(data, &tokenData)
+		if err != nil {
+			return openapi.InternalError(fmt.Errorf("error with marhsallign cached token: %v", err).Error(), "Error With Authenticating to Spotify"), nil
+		}
+
+		log.Println("Using cached token")
+		return gen.GetToken200JSONResponse{
+			AccessToken: tokenData.AccessToken,
+			Expiry:      int(tokenData.Expiry),
+		}, nil
+	}
+
 	config := &clientcredentials.Config{
 		ClientID:     h.Env.Spotify.ClientID,
 		ClientSecret: h.Env.Spotify.ClientSecret,
@@ -26,8 +44,21 @@ func (h *Handler) GetToken(ctx context.Context, request gen.GetTokenRequestObjec
 		return openapi.InternalError(fmt.Errorf("error with getting token: %v", err).Error(), "Error With Authenticating to Spotify"), nil
 	}
 
+	tokenDuration := time.Until(token.Expiry)
+	tokenData := gen.Token{
+		AccessToken: token.AccessToken,
+		Expiry:      int(token.Expiry.Unix()),
+	}
+	data, err = json.Marshal(tokenData)
+	if err != nil {
+		return openapi.InternalError(fmt.Errorf("error with marshalling token: %v", err).Error(), "Error With Authenticating to Spotify"), nil
+	}
+
+	log.Printf("Saving token to cache for duration %fh:%fm:%fs", tokenDuration.Hours(), tokenDuration.Minutes(), tokenDuration.Seconds())
+	h.Cache.Set("token", data, tokenDuration)
+
 	return gen.GetToken200JSONResponse{
 		AccessToken: token.AccessToken,
-		ExpiresIn:   int(token.Expiry.Unix()),
+		Expiry:      int(token.Expiry.Unix()),
 	}, nil
 }

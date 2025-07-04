@@ -25,11 +25,8 @@ type Token struct {
 	// AccessToken The access token to use for API calls.
 	AccessToken string `json:"access_token"`
 
-	// ExpiresIn The time in seconds until the token expires.
-	ExpiresIn int `json:"expires_in"`
-
-	// TokenType The type of token, always "Bearer".
-	TokenType string `json:"token_type"`
+	// Expiry The time in seconds until the token expires.
+	Expiry int `json:"expiry"`
 }
 
 // AuthSecret defines model for AuthSecret.

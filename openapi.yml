@@ -53,12 +53,12 @@ components:
         access_token:
           type: string
           description: The access token to use for API calls.
-        expires_in:
+        expiry:
           type: integer
           description: The time in seconds until the token expires.
       required:
         - access_token
-        - expires_in
+        - expiry
 
     Error:
       type: object
