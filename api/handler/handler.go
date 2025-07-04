@@ -1,8 +1,15 @@
 // Package handler provides HTTP handlers for the API using openapi-spec.
 package handler
 
-type Handler struct{}
+import "github.com/arinji2/spotify-ui-api/internal/cache/env"
+
+type Handler struct {
+	Env *env.Env
+}
 
 func NewHandler() *Handler {
-	return &Handler{}
+	env := env.SetupEnv()
+	return &Handler{
+		Env: env,
+	}
 }
