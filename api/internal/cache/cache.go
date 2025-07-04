@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const DefaultCacheDuration = 24 * time.Hour
+
 type CacheItem struct {
 	Value      []byte `json:"value"`
 	Expiration int64  `json:"expiration"`
@@ -28,11 +30,11 @@ func NewInMemoryCache() *InMemoryCache {
 	return cache
 }
 
-func (c *InMemoryCache) Get(key string) ([]byte, bool) {
+func (c *InMemoryCache) Get(key Key) ([]byte, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	item, found := c.items[key]
+	item, found := c.items[key.k]
 	if !found || time.Now().UnixNano() > item.Expiration {
 		return nil, false
 	}
@@ -40,11 +42,11 @@ func (c *InMemoryCache) Get(key string) ([]byte, bool) {
 	return item.Value, true
 }
 
-func (c *InMemoryCache) Set(key string, value []byte, duration time.Duration) {
+func (c *InMemoryCache) Set(key Key, value []byte, duration time.Duration) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.items[key] = CacheItem{
+	c.items[key.k] = CacheItem{
 		Value:      value,
 		Expiration: time.Now().Add(duration).UnixNano(),
 	}
