@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/arinji2/spotify-ui-api/internal/cache"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -17,7 +18,7 @@ type Token struct {
 }
 
 func (s *Spotify) GetToken(ctx context.Context) (oauth2.Token, error) {
-	data, exists := s.Cache.Get("token")
+	data, exists := s.Cache.Get(cache.Token)
 	if exists {
 		var cachedToken oauth2.Token
 		if err := json.Unmarshal(data, &cachedToken); err != nil {
@@ -44,7 +45,7 @@ func (s *Spotify) GetToken(ctx context.Context) (oauth2.Token, error) {
 	}
 
 	cacheDuration := time.Until(token.Expiry)
-	s.Cache.Set("token", data, cacheDuration)
+	s.Cache.Set(cache.Token, data, cacheDuration)
 
 	log.Printf("Cached token")
 	return *token, nil
