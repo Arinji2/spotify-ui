@@ -1,5 +1,5 @@
 package: gen
-output: api/gen/api.gen.go
+output: api/internal/gen/api.gen.go
 
 generate:
   models: true
