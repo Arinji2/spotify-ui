@@ -6,26 +6,30 @@ import (
 	"log"
 	"time"
 
-	"github.com/arinji2/spotify-ui-api/internal/gen"
 	"github.com/zmb3/spotify"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-func (s *Spotify) GetToken(ctx context.Context, clientID, clientSecret string) (gen.Token, error) {
+type Token struct {
+	AccessToken string `json:"access_token"`
+	Expiry      int    `json:"expiry"`
+}
+
+func (s *Spotify) GetToken(ctx context.Context) (Token, error) {
 	data, exists := s.Cache.Get("token")
 	if exists {
-		var cachedToken gen.Token
+		var cachedToken Token
 		if err := json.Unmarshal(data, &cachedToken); err != nil {
-			return gen.Token{}, err
+			return Token{}, err
 		}
 
 		log.Println("Using cached token")
 		return cachedToken, nil
 	}
 	config := &clientcredentials.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
+		ClientID:     s.ClientID,
+		ClientSecret: s.ClientSecret,
 		TokenURL:     spotifyauth.TokenURL,
 	}
 
@@ -34,18 +38,18 @@ func (s *Spotify) GetToken(ctx context.Context, clientID, clientSecret string) (
 	client := spotify.NewClient(httpClient)
 	token, err := client.Token()
 	if err != nil {
-		return gen.Token{}, err
+		return Token{}, err
 	}
 
 	expiryUnix := int(token.Expiry.Unix())
-	tokenData := gen.Token{
+	tokenData := Token{
 		AccessToken: token.AccessToken,
 		Expiry:      expiryUnix,
 	}
 
 	data, err = json.Marshal(tokenData)
 	if err != nil {
-		return gen.Token{}, err
+		return Token{}, err
 	}
 
 	cacheDuration := time.Until(token.Expiry)
