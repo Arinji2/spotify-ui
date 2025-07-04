@@ -40,7 +40,10 @@ func main() {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 
-	cache.SaveToFile()
+	isDebug := os.Getenv("DEBUG") == "true"
+	if !isDebug {
+		cache.SaveToFile()
+	}
 
 	log.Println("Server exited gracefully")
 }
