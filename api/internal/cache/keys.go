@@ -4,7 +4,7 @@ import "fmt"
 
 // Key represents a type-safe cache key.
 type Key struct {
-	k string
+	K string
 }
 
 // Playlist returns the cache key for a specific playlist ID.

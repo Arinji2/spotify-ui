@@ -55,7 +55,7 @@ func (c *InMemoryCache) Get(key Key) ([]byte, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	item, found := c.items[key.k]
+	item, found := c.items[key.K]
 	if !found || time.Now().UnixNano() > item.Expiration {
 		return nil, false
 	}
@@ -67,7 +67,7 @@ func (c *InMemoryCache) Set(key Key, value []byte, duration time.Duration) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.items[key.k] = CacheItem{
+	c.items[key.K] = CacheItem{
 		Value:      value,
 		Expiration: time.Now().Add(duration).UnixNano(),
 	}
