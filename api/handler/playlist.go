@@ -8,6 +8,7 @@ import (
 	"github.com/arinji2/spotify-ui-api/internal/cache"
 	"github.com/arinji2/spotify-ui-api/internal/contants"
 	"github.com/arinji2/spotify-ui-api/internal/gen"
+	"github.com/arinji2/spotify-ui-api/internal/logx"
 	"github.com/arinji2/spotify-ui-api/internal/openapi"
 	"github.com/arinji2/spotify-ui-api/internal/spotifyx"
 	"github.com/zmb3/spotify/v2"
@@ -28,6 +29,7 @@ func (h *Handler) GetPlaylist(ctx context.Context, request gen.GetPlaylistReques
 			}, nil
 		}
 
+		logx.Debug("Using cached playlist for %s", cache.Playlist(playlistID).K)
 		return gen.GetPlaylist200JSONResponse(cachedPlaylist), nil
 	}
 
@@ -106,6 +108,7 @@ func (h *Handler) GetPlaylist(ctx context.Context, request gen.GetPlaylistReques
 		}, nil
 	}
 
+	logx.Debug("Setting cache for %s", cache.Playlist(playlistID).K)
 	h.Cache.Set(cache.Playlist(playlistID), data, cache.DefaultCacheDuration)
 
 	return gen.GetPlaylist200JSONResponse(formattedPlaylist), nil
