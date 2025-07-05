@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import {
   Bell,
   ChevronLeft,
@@ -8,8 +9,10 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import { useState } from 'react'
 
 export function Navbar() {
+  const [input, setInput] = useState('')
   return (
     <div className="flex h-fit w-full items-center justify-between">
       <div className="flex h-full w-fit items-center justify-center gap-3">
@@ -25,9 +28,19 @@ export function Navbar() {
           <Search className="size-5 text-white/60 hover:text-white" />
           <input
             type="text"
-            className="h-full w-[300px] bg-transparent text-base font-medium text-white outline-none"
+            placeholder="What do you want to play?"
+            className="h-full w-[300px] bg-transparent text-sm font-medium text-white outline-none"
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
           />
-          <X className="size-5 text-white/60 hover:text-white" />
+          <X
+            className={cn(
+              'size-5 text-white/60 transition-opacity duration-200 ease-in-out hover:text-white',
+              {
+                'opacity-0': input === '',
+              },
+            )}
+          />
           <div className="h-full w-[2px] bg-white/10"></div>
           <Compass className="size-5 text-white/60 hover:text-white" />
         </div>
