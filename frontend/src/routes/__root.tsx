@@ -9,6 +9,8 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import TanStackQueryLayout from '../integrations/tanstack-query/layout.tsx'
 
 import appCss from '../styles.css?url'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
 
 import type { QueryClient } from '@tanstack/react-query'
 

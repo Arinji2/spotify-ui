@@ -136,3 +136,16 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+.react-resizable-handle {
+  z-index: 1000;
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  bottom: 0;
+  right: 0;
+  background: rgb(255, 255, 255, 0.25);
+  color: white;
+  border-radius: 2px;
+  cursor: se-resize;
+}

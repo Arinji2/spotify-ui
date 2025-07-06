@@ -14,17 +14,14 @@ export function PlaylistSmall({
   className?: ClassValue
 }) {
   return (
-    <div
-      className={cn(
-        'aspect-[3/1] w-full overflow-hidden rounded-sm bg-white/15',
-        className,
-      )}
-    >
-      <ErrorWrapper small className="rounded-none">
-        <Suspense fallback={<SuspenseUI />}>
-          <Render playlistID={playlistID} />
-        </Suspense>
-      </ErrorWrapper>
+    <div className={cn('h-[80px] w-full py-2', className)}>
+      <div className="@container h-full w-full overflow-hidden rounded-sm bg-white/15">
+        <ErrorWrapper small className="rounded-none">
+          <Suspense fallback={<SuspenseUI />}>
+            <Render playlistID={playlistID} />
+          </Suspense>
+        </ErrorWrapper>
+      </div>
     </div>
   )
 }
@@ -53,7 +50,7 @@ function Render({ playlistID }: { playlistID: string }) {
   return (
     <div
       className={
-        '@container flex h-full w-full flex-row items-center justify-start gap-2 pr-2'
+        'flex h-full w-full flex-row items-center justify-start gap-2 pr-2'
       }
     >
       <div className="h-full w-[30%] shrink-0">
@@ -63,7 +60,7 @@ function Render({ playlistID }: { playlistID: string }) {
           className="h-full w-full object-cover"
         />
       </div>
-      <p className="line-clamp-2 leading-tight font-semibold text-white @lg:text-xs @xl:text-base">
+      <p className="line-clamp-2 text-xs leading-tight font-semibold text-white @[150px]:text-xs @[200px]:text-sm @[300px]:text-base">
         {data.name}
       </p>
     </div>

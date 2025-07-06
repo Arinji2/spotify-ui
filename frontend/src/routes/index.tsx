@@ -1,8 +1,11 @@
 import { Filters } from '@/components/filter'
 import { Navbar } from '@/components/navbar'
 import { PlaylistSmall } from '@/components/playlist/small'
-import { Button } from '@/components/ui/button'
 import { createFileRoute } from '@tanstack/react-router'
+
+import { Responsive, WidthProvider } from 'react-grid-layout'
+
+const ResponsiveGridLayout = WidthProvider(Responsive)
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -14,43 +17,72 @@ function App() {
       <Navbar />
 
       <div className="flex h-full w-full flex-row items-center justify-center gap-2">
+        {/* Left Sidebar */}
         <div className="h-full w-[20%] shrink-0 rounded-md bg-zinc-800"></div>
 
-        <div className="flex h-full w-full flex-col items-center justify-start gap-4 rounded-md bg-gradient-to-b from-blue-800/40 to-zinc-800 to-[40%] px-6 py-4">
-          <Filters
-            items={[
-              {
-                name: 'All',
-                active: true,
-              },
-              {
-                name: 'Music',
-                active: false,
-              },
-              {
-                name: 'Podcasts',
-                active: false,
-              },
-            ]}
-          />
-
-          <div className="@container h-fit w-full">
-            <div className="grid w-full grid-cols-2 gap-3 @md:grid-cols-3 @lg:grid-cols-4">
-              {[
-                '51F1tRoACwMG0xfCEeXU4f',
-                '4NHOP3Wtcldm6i5ABPR7cc',
-                '6efnlir2xmESQV1nTuXmWO',
-                '0JFatPoPq82gNcPa4esOzj',
-                '6j4w1woXd7xzGCNQoKrpY9',
-                '00L6YaFg8TlZC30ktupQGQ',
-                '58HdVBtaxycPqt300NjqOk',
-                '0QhW1ZOGJttVn5sEtLuJIo',
-              ].map((playlistID) => (
-                <PlaylistSmall playlistID={playlistID} />
-              ))}
+        <div className="h-full w-full overflow-hidden rounded-md bg-gradient-to-b from-blue-800/40 to-zinc-800 to-[40%] p-4 px-1">
+          <ResponsiveGridLayout
+            onResizeStop={(newItem) => {
+              for (const item of newItem) {
+                if (item.i === 'playlists') {
+                  const snapped = Math.round(item.h / 2) * 2
+                  item.h = snapped
+                }
+              }
+            }}
+            className="layout"
+            breakpoints={{ lg: 1024, md: 768, sm: 0 }}
+            cols={{ lg: 3, md: 3, sm: 1 }}
+            rowHeight={40}
+            isResizable={true}
+            isDraggable={true}
+            margin={[0, 0]}
+            useCSSTransforms={true}
+            compactType="horizontal"
+            preventCollision={true}
+            containerPadding={[0, 0]}
+          >
+            <div key="filters" data-grid={{ x: 0, y: 0, w: 1, h: 1, maxH: 1 }}>
+              <Filters
+                items={[
+                  { name: 'All', active: true },
+                  { name: 'Music', active: false },
+                  { name: 'Podcasts', active: false },
+                ]}
+              />
             </div>
-          </div>
+
+            <div
+              key="playlists"
+              className="@container h-full w-full overflow-hidden"
+              data-grid={{
+                x: 0,
+                y: 1,
+                w: 3,
+                minH: 2,
+                h: 6,
+                maxH: 6,
+              }}
+            >
+              <div className="grid w-full grid-cols-2 gap-x-3 @md:grid-cols-3">
+                {[
+                  '51F1tRoACwMG0xfCEeXU4f',
+                  '4NHOP3Wtcldm6i5ABPR7cc',
+                  '6efnlir2xmESQV1nTuXmWO',
+                  '0JFatPoPq82gNcPa4esOzj',
+                  '6j4w1woXd7xzGCNQoKrpY9',
+                  '00L6YaFg8TlZC30ktupQGQ',
+                  '58HdVBtaxycPqt300NjqOk',
+                  '0QhW1ZOGJttVn5sEtLuJIo',
+                ].map((playlistID) => (
+                  <PlaylistSmall key={playlistID} playlistID={playlistID} />
+                ))}
+              </div>
+            </div>
+          </ResponsiveGridLayout>
         </div>
+
+        {/* Right Sidebar */}
         <div className="h-full w-[20%] shrink-0 rounded-md bg-zinc-800"></div>
       </div>
     </div>
