@@ -1,6 +1,7 @@
 import { Filters } from '@/components/filter'
 import { Navbar } from '@/components/navbar'
 import { PlaylistSmall } from '@/components/playlist/small'
+import { useResponsive } from '@/lib/responsive'
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Responsive, WidthProvider } from 'react-grid-layout'
@@ -12,13 +13,14 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
+  const { isMobile } = useResponsive()
   return (
     <div className="flex h-[100svh] w-full flex-col items-center justify-start gap-2 px-2 py-2">
       <Navbar />
 
       <div className="flex h-full w-full flex-row items-center justify-center gap-2">
         {/* Left Sidebar */}
-        <div className="h-full w-[20%] shrink-0 rounded-md bg-zinc-800"></div>
+        <div className="hidden h-full w-[20%] shrink-0 rounded-md bg-zinc-800 md:block"></div>
 
         <div className="h-full w-full overflow-hidden rounded-md bg-gradient-to-b from-blue-800/40 to-zinc-800 to-[40%] p-4 px-1">
           <ResponsiveGridLayout
@@ -34,8 +36,8 @@ function App() {
             breakpoints={{ lg: 1024, md: 768, sm: 0 }}
             cols={{ lg: 3, md: 3, sm: 1 }}
             rowHeight={40}
-            isResizable={true}
-            isDraggable={true}
+            isResizable={isMobile ? false : true}
+            isDraggable={isMobile ? false : true}
             margin={[0, 0]}
             useCSSTransforms={true}
             compactType="horizontal"
@@ -83,7 +85,7 @@ function App() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="h-full w-[20%] shrink-0 rounded-md bg-zinc-800"></div>
+        <div className="hidden h-full w-[20%] shrink-0 rounded-md bg-zinc-800 md:block"></div>
       </div>
     </div>
   )
