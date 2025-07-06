@@ -12,6 +12,7 @@ export const createRouter = () => {
     createTanstackRouter({
       routeTree,
       context: {
+        // Modified according to https://github.com/TanStack/router/issues/4493#issuecomment-3032486341
         queryClient: TanstackQuery.getContext().queryClient,
       },
       scrollRestoration: true,
