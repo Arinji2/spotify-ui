@@ -7,13 +7,12 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 
-// Create a new router instance
 export const createRouter = () => {
   const router = routerWithQueryClient(
     createTanstackRouter({
       routeTree,
       context: {
-        ...TanstackQuery.getContext(),
+        queryClient: TanstackQuery.getContext().queryClient,
       },
       scrollRestoration: true,
       defaultPreloadStaleTime: 0,

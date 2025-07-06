@@ -1,6 +1,7 @@
 import { Filters } from '@/components/filter'
 import { Navbar } from '@/components/navbar'
 import { PlaylistSmall } from '@/components/playlist/small'
+import { useDesignMode } from '@/lib/design'
 import { useResponsive } from '@/lib/responsive'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -14,6 +15,7 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const { isMobile } = useResponsive()
+  const { isDesignMode } = useDesignMode()
   return (
     <div className="flex h-[100svh] w-full flex-col items-center justify-start gap-2 px-2 py-2">
       <Navbar />
@@ -24,6 +26,8 @@ function App() {
 
         <div className="h-full w-full overflow-hidden rounded-md bg-gradient-to-b from-blue-800/40 to-zinc-800 to-[40%] p-4 px-1">
           <ResponsiveGridLayout
+            draggableCancel=".no-drag"
+            key={`layout-${isDesignMode}`}
             onResizeStop={(newItem) => {
               for (const item of newItem) {
                 if (item.i === 'playlists') {
@@ -36,8 +40,8 @@ function App() {
             breakpoints={{ lg: 1024, md: 768, sm: 0 }}
             cols={{ lg: 3, md: 3, sm: 1 }}
             rowHeight={40}
-            isResizable={isMobile ? false : true}
-            isDraggable={isMobile ? false : true}
+            isResizable={isMobile ? false : isDesignMode}
+            isDraggable={isMobile ? false : isDesignMode}
             margin={[0, 0]}
             useCSSTransforms={true}
             compactType="horizontal"

@@ -13,6 +13,7 @@ import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { DesignModeProvider } from '@/lib/design.tsx'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -57,7 +58,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="bg-zinc-900">
-        {children}
+        <DesignModeProvider>{children}</DesignModeProvider>
         <Scripts />
       </body>
     </html>
