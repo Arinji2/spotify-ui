@@ -29,7 +29,7 @@ export function Navbar() {
           <input
             type="text"
             placeholder="What do you want to play?"
-            className="h-full w-[300px] bg-transparent text-sm font-medium text-white outline-none"
+            className="h-full w-[300px] bg-transparent font-medium text-sm text-white outline-none"
             onChange={(e) => setInput(e.target.value)}
             value={input}
           />

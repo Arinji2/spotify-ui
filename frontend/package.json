@@ -39,6 +39,7 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.1.2",
     "@tanstack/eslint-config": "^0.1.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
