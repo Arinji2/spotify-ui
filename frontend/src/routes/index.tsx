@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { Filters } from "@/components/filter";
 import { Navbar } from "@/components/navbar";
+import { PlaylistMedium } from "@/components/playlist/medium";
 import { PlaylistSmall } from "@/components/playlist/small";
 import { useDesignMode } from "@/lib/design";
 import { useResponsive } from "@/lib/responsive";
+import { ArtistCard } from "@/components/artist/card";
+import { parseContentId } from "@/lib/checker";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -29,7 +32,7 @@ function App() {
 				{/* Left Sidebar */}
 				<div className="hidden h-full w-[20%] shrink-0 rounded-md bg-zinc-800 md:block"></div>
 
-				<div className="h-full w-full overflow-hidden rounded-md bg-gradient-to-b from-blue-800/40 to-[40%] to-zinc-800 p-4 px-1">
+				<div className="h-full w-full overflow-hidden rounded-md bg-gradient-to-b from-blue-800/40 to-[40%] to-zinc-900 p-4 px-1">
 					{hasMounted && (
 						<ResponsiveGridLayout
 							draggableCancel=".no-drag"
@@ -92,6 +95,51 @@ function App() {
 									].map((playlistID) => (
 										<PlaylistSmall key={playlistID} playlistID={playlistID} />
 									))}
+								</div>
+							</div>
+							<div
+								key="made-for-you"
+								className="@container h-full w-full overflow-hidden"
+								data-grid={{
+									x: 0,
+									y: 2,
+									w: 3,
+									h: 7,
+									minH: 4,
+								}}
+							>
+								<div className="flex h-full flex-col items-start justify-start gap-3 py-2 pt-4 [container-type:size] ">
+									<p className="font-semibold text-white text-xl">
+										Jump back in
+									</p>
+									<div className=" no-drag flex h-full w-full flex-row items-center justify-start gap-6 overflow-x-auto ">
+										{[
+											"51F1tRoACwMG0xfCEeXU4f",
+											"4NHOP3Wtcldm6i5ABPR7cc",
+											"6efnlir2xmESQV1nTuXmWO",
+											"0JFatPoPq82gNcPa4esOzj",
+											"6j4w1woXd7xzGCNQoKrpY9",
+											"00L6YaFg8TlZC30ktupQGQ",
+											"58HdVBtaxycPqt300NjqOk",
+											"0QhW1ZOGJttVn5sEtLuJIo",
+											"artist-0QhW1ZOGJttVn5sEtLuJIo",
+										].map((playlistID) => {
+											const { type, id } = parseContentId(playlistID);
+											if (type === "artist") {
+												return (
+													<ArtistCard className="py-0" key={id} artistID={id} />
+												);
+											} else {
+												return (
+													<PlaylistMedium
+														className="py-0"
+														key={id}
+														playlistID={id}
+													/>
+												);
+											}
+										})}
+									</div>
 								</div>
 							</div>
 						</ResponsiveGridLayout>
