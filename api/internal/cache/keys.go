@@ -12,5 +12,10 @@ func Playlist(id string) Key {
 	return Key{fmt.Sprintf("playlist-%s", id)}
 }
 
+// Artist returns the cache key for a specific artist ID.
+func Artist(id string) Key {
+	return Key{fmt.Sprintf("artist-%s", id)}
+}
+
 // Token is the cache key for the Spotify token.
 var Token = Key{"token"}

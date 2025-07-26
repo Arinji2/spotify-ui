@@ -28,6 +28,30 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /api/artist/{artist_id}:
+    get:
+      summary: Get Arist Metadata
+      operationId: getArtist
+      parameters:
+        - $ref: "#/components/parameters/AuthSecret"
+        - name: artist_id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Artist data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Artist"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
 components:
   parameters:
     AuthSecret:
@@ -90,7 +114,7 @@ components:
         - height
         - width
 
-    Artist:
+    SimplifiedArtist:
       type: object
       properties:
         id:
@@ -136,7 +160,7 @@ components:
         artists:
           type: array
           items:
-            $ref: "#/components/schemas/Artist"
+            $ref: "#/components/schemas/SimplifiedArtist"
         duration_ms:
           type: integer
       required:
@@ -172,6 +196,25 @@ components:
           $ref: "#/components/schemas/User"
         tracks:
           $ref: "#/components/schemas/TrackPage"
+      required:
+        - id
+        - name
+        - description
+        - images
+        - owner
+        - tracks
+
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
       required:
         - id
         - name

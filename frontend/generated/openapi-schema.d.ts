@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/artist/{artist_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Arist Metadata */
+        get: operations["getArtist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -40,7 +57,7 @@ export interface components {
             height: number;
             width: number;
         };
-        Artist: {
+        SimplifiedArtist: {
             id: string;
             name: string;
         };
@@ -56,7 +73,7 @@ export interface components {
         Track: {
             id: string;
             name: string;
-            artists: components["schemas"]["Artist"][];
+            artists: components["schemas"]["SimplifiedArtist"][];
             duration_ms: number;
         };
         TrackPage: {
@@ -69,6 +86,11 @@ export interface components {
             images: components["schemas"]["Image"][];
             owner: components["schemas"]["User"];
             tracks: components["schemas"]["TrackPage"];
+        };
+        Artist: {
+            id: string;
+            name: string;
+            images: components["schemas"]["Image"][];
         };
     };
     responses: {
@@ -120,6 +142,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Playlist"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getArtist: {
+        parameters: {
+            query: {
+                secret: components["parameters"]["AuthSecret"];
+            };
+            header?: never;
+            path: {
+                artist_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Artist data */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Artist"];
                 };
             };
             401: components["responses"]["Unauthorized"];

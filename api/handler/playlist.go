@@ -83,7 +83,7 @@ func (h *Handler) GetPlaylist(ctx context.Context, request gen.GetPlaylistReques
 		})
 
 		for _, artist := range track.Track.Artists {
-			formattedPlaylist.Tracks.Items[i].Track.Artists = append(formattedPlaylist.Tracks.Items[i].Track.Artists, gen.Artist{
+			formattedPlaylist.Tracks.Items[i].Track.Artists = append(formattedPlaylist.Tracks.Items[i].Track.Artists, gen.SimplifiedArtist{
 				Id:   string(artist.ID),
 				Name: artist.Name,
 			})
