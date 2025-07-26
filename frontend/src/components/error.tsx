@@ -22,12 +22,12 @@ export function ErrorWrapper({
 			fallbackRender={({ error, resetErrorBoundary }) => (
 				<div
 					className={cn(
-						"flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl bg-red-800 p-4 text-center",
+						"@container flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl bg-red-800 p-2 text-center",
 						className,
 					)}
 				>
 					{!small && (
-						<h2 className="font-semibold text-2xl text-brand-text tracking-small">
+						<h2 className="@max-[150px]:hidden font-semibold @max-[200px]:text-lg text-2xl text-black tracking-small">
 							Something went wrong!
 						</h2>
 					)}
