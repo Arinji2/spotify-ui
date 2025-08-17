@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
+import { ArtistCard } from "@/components/artist/card";
 import { Filters } from "@/components/filter";
 import { Navbar } from "@/components/navbar";
 import { PlaylistMedium } from "@/components/playlist/medium";
 import { PlaylistSmall } from "@/components/playlist/small";
+import { parseContentId } from "@/lib/checker";
 import { useDesignMode } from "@/lib/design";
 import { useResponsive } from "@/lib/responsive";
-import { ArtistCard } from "@/components/artist/card";
-import { parseContentId } from "@/lib/checker";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -118,11 +118,11 @@ function App() {
 											"4NHOP3Wtcldm6i5ABPR7cc",
 											"6efnlir2xmESQV1nTuXmWO",
 											"0JFatPoPq82gNcPa4esOzj",
+											"artist-2YZyLoL8N0Wb9xBt1NhZWg",
 											"6j4w1woXd7xzGCNQoKrpY9",
 											"00L6YaFg8TlZC30ktupQGQ",
 											"58HdVBtaxycPqt300NjqOk",
 											"0QhW1ZOGJttVn5sEtLuJIo",
-											"artist-0QhW1ZOGJttVn5sEtLuJIo",
 										].map((playlistID) => {
 											const { type, id } = parseContentId(playlistID);
 											if (type === "artist") {
