@@ -47,11 +47,11 @@ function Render({ artistID }: { artistID: string }) {
 
 	return (
 		<div className="flex h-full w-full flex-col items-start justify-start gap-3 [container-type:size]">
-			<div className="h-[70%] w-full shrink-0 [@container(max-height:200px)]:h-[50%]">
+			<div className="h-[70%] w-full shrink-0 [@container(max-height:200px)]:h-[50%] flex flex-col items-center justify-center">
 				<img
 					src={data.images[0].url}
 					alt={data.name}
-					className="aspect-square h-full w-auto shrink-0 rounded-full object-cover"
+					className="aspect-square w-full shrink-0 rounded-full object-cover md:h-full md:w-auto"
 				/>
 			</div>
 
